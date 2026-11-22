@@ -259,6 +259,21 @@ solana-verify get-program-hash -u devnet FgFQwXGVeKDNawwer8Toa1xSKih1DgQp9JMjp3f
 Run the build from a clean checkout: a `target/` directory produced by a local toolchain makes the container build
 fail.
 
+To check a deployed program against this repository, run `verify-from-repo`. It rebuilds the program at the given
+commit, compares the hash with the on-chain program and, when signed by the upgrade authority, uploads a verification
+record that anyone can read back:
+
+```bash
+solana-verify verify-from-repo https://github.com/aelmanaa/ccip-solana-v2-examples --current-dir \
+  --program-id FgFQwXGVeKDNawwer8Toa1xSKih1DgQp9JMjp3ft7SkA -u https://api.devnet.solana.com \
+  --commit-hash <commit> --library-name ccip_v2_receiver -b solanafoundation/solana-verifiable-build:4.3.0
+solana-verify get-program-pda --program-id FgFQwXGVeKDNawwer8Toa1xSKih1DgQp9JMjp3ft7SkA -u https://api.devnet.solana.com
+```
+
+Run it from a clone of this repository under your home directory (`--current-dir`): on macOS, Docker cannot see a
+clone under `/tmp`. The remote verification service behind the explorers' "Verified Build" badge only accepts
+mainnet programs, so on Devnet the verification is checked with `solana-verify` itself.
+
 ### IDL
 
 Upload each IDL to the Program Metadata program so explorers decode instructions, accounts and arguments:
