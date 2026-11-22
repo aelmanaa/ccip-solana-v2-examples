@@ -1,0 +1,25 @@
+[toolchain]
+anchor_version = "1.1.2"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+ccip_v2_sender = "5jYRxh4wyaupjbxJ4s5y1ypZCV1qhheZWaAY8MgYuNc5"
+ccip_v2_receiver = "FgFQwXGVeKDNawwer8Toa1xSKih1DgQp9JMjp3ft7SkA"
+ccip_v2_ping_pong = "6A4neXDjavAyHnkGcVBckV2hQpBQhp7bXT2BS5JPR7Mh"
+test_mock_offramp = "32U3WgKXLktgW6p9MKdgizs7zgQ4wLmfAqXCkfVLUfL8"
+test_mock_router = "J1Jr3eXeTwskq5Tdw153Go4kGS5FV868iTh2JjH5uALz"
+
+[programs.devnet]
+ccip_v2_sender = "5jYRxh4wyaupjbxJ4s5y1ypZCV1qhheZWaAY8MgYuNc5"
+ccip_v2_receiver = "FgFQwXGVeKDNawwer8Toa1xSKih1DgQp9JMjp3ft7SkA"
+ccip_v2_ping_pong = "6A4neXDjavAyHnkGcVBckV2hQpBQhp7bXT2BS5JPR7Mh"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "cargo test --workspace"

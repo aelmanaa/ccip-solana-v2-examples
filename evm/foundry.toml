@@ -1,0 +1,27 @@
+[profile.default]
+src = "src"
+out = "out"
+test = "test"
+libs = ["node_modules"]
+solc = "0.8.24"
+optimizer = true
+optimizer_runs = 200
+evm_version = "cancun"
+remappings = [
+    "@chainlink/contracts-ccip/=node_modules/@chainlink/contracts-ccip/",
+    "@openzeppelin/contracts@5.3.0/=node_modules/@openzeppelin/contracts-5.3.0/",
+    "forge-std/=node_modules/forge-std/src/",
+]
+
+# The linter checks the shipped contract; test mocks (a payable router stand-in) are exempt.
+[lint]
+ignore = ["test/**/*.sol"]
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}", chain = 11155111 }
+
+[fmt]
+line_length = 120
+tab_width = 4
+quote_style = "double"
+bracket_spacing = true

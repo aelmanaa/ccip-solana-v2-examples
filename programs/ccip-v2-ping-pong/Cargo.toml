@@ -1,0 +1,26 @@
+[package]
+name = "ccip_v2_ping_pong"
+version = "0.1.0"
+description = "Example CCIP 2.0 program for Solana that both sends and receives: ping a peer, answer its pings with a pong"
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "ccip_v2_ping_pong"
+
+[features]
+no-entrypoint = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build", "ccip_common/idl-build", "ccip_router/idl-build"]
+
+[dependencies]
+anchor-lang = { workspace = true }
+anchor_discriminator = { workspace = true }
+ccip_common = { workspace = true }
+ccip_router = { workspace = true }
+
+[lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = ['cfg(target_os, values("solana"))', 'cfg(feature, values("anchor-debug", "custom-panic", "custom-heap", "no-idl", "no-log-ix-name"))']

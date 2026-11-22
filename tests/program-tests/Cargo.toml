@@ -1,0 +1,23 @@
+[package]
+name = "program-tests"
+version = "0.1.0"
+description = "LiteSVM tests for the example programs (loads the built .so files from target/deploy)"
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+anchor-lang = { workspace = true }
+anchor-spl = { workspace = true }
+ccip_common = { workspace = true }
+ccip_v2_receiver = { path = "../../programs/ccip-v2-receiver", features = ["no-entrypoint"] }
+ccip_v2_ping_pong = { path = "../../programs/ccip-v2-ping-pong", features = ["no-entrypoint"] }
+test_mock_offramp = { path = "../../programs/test-mock-offramp", features = ["no-entrypoint"] }
+test_mock_router = { path = "../../programs/test-mock-router", features = ["no-entrypoint"] }
+litesvm = "0.10.0"
+solana-account = "3.0.0"
+solana-keypair = "3.0.1"
+solana-message = "3.0.1"
+solana-signer = "3.0.0"
+solana-transaction = "3.0.2"
+spl-token = "9.0.0"

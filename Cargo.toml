@@ -1,0 +1,25 @@
+[workspace]
+members = ["programs/*", "tests/program-tests"]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+
+[workspace.dependencies]
+anchor-lang = { version = "=1.1.2", features = ["init-if-needed", "event-cpi"] }
+anchor-spl = "=1.1.2"
+# CCIP 2.0 shared types (MIT) and the router's CPI interface, pinned to one upstream commit.
+ccip_common = { git = "https://github.com/smartcontractkit/chainlink-ccip-solana", rev = "3f5d182fe619087bdebaf5f3d388c4248dea9f14", features = ["no-entrypoint"] }
+ccip_router = { git = "https://github.com/smartcontractkit/chainlink-ccip-solana", rev = "3f5d182fe619087bdebaf5f3d388c4248dea9f14", features = ["no-entrypoint"] }
+anchor_discriminator = { git = "https://github.com/smartcontractkit/chainlink-ccip-solana", rev = "3f5d182fe619087bdebaf5f3d388c4248dea9f14" }
+
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
+
+[profile.release.build-override]
+opt-level = 3
+incremental = false
+codegen-units = 1
