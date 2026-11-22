@@ -37,13 +37,6 @@ fn signer() -> Pubkey {
 fn peer() -> Pubkey {
     pda(&[b"peer", &EVM_SOURCE.to_le_bytes()])
 }
-fn pending(seq: u64) -> Pubkey {
-    pda(&[
-        b"pending_reply",
-        &EVM_SOURCE.to_le_bytes(),
-        &seq.to_le_bytes(),
-    ])
-}
 fn ccv_config() -> Pubkey {
     pda(&[b"ccv_config", &EVM_SOURCE.to_le_bytes()])
 }

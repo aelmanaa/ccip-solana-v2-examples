@@ -4,12 +4,12 @@ Three Anchor programs that use [Chainlink CCIP](https://docs.chain.link/ccip) 2.
 contract they talk to, TypeScript scripts built on [`@chainlink/ccip-sdk`](https://www.npmjs.com/package/@chainlink/ccip-sdk),
 and LiteSVM tests.
 
-| Program             | What it does                                                                                                      |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `ccip_v2_sender`    | Sends CCIP messages (data, one token, fee in SOL or an SPL token) by CPI into the router's `ccip_send_v2`.        |
+| Program             | What it does                                                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `ccip_v2_sender`    | Sends CCIP messages (data, one token, fee in SOL or an SPL token) by CPI into the router's `ccip_send_v2`.               |
 | `ccip_v2_receiver`  | Receives messages: stores data, keeps tokens, or forwards tokens to a beneficiary; declares its CCV and finality policy. |
-| `ccip_v2_ping_pong` | Sends and receives: pings a peer on another chain and answers the peer's pings.                                   |
-| `evm/PingPongPeer`  | The ping-pong peer on an EVM chain (Foundry, `@chainlink/contracts-ccip` 2.0.0).                                 |
+| `ccip_v2_ping_pong` | Sends and receives: pings a peer on another chain and answers the peer's pings.                                          |
+| `evm/PingPongPeer`  | The ping-pong peer on an EVM chain (Foundry, `@chainlink/contracts-ccip` 2.0.0).                                         |
 
 The sender is derived from `example-ccip-sender-v2` and the receiver from `example-ccip-receiver-v2` in
 [smartcontractkit/chainlink-ccip-solana](https://github.com/smartcontractkit/chainlink-ccip-solana) (MIT). The
@@ -66,13 +66,13 @@ the recipient and the extra args (`GenericExtraArgsV3`: gas limit, requested fin
 - **Cost.** A data message through the program uses about 32k more compute units than the same message sent directly
   by a wallet, for the PDA deposit, refund and event.
 
-| Instruction                                      | Who            |
-| ------------------------------------------------ | -------------- |
-| `initialize(router)`                             | upgrade authority |
-| `init_chain_config`, `update_chain_config`, `remove_chain_config` | owner |
-| `init_ccip_sender_ata`                           | owner          |
-| `ccip_send(params)`                              | anyone         |
-| `withdraw_tokens`, `update_router`, `transfer_ownership`, `accept_ownership` | owner |
+| Instruction                                                                  | Who               |
+| ---------------------------------------------------------------------------- | ----------------- |
+| `initialize(router)`                                                         | upgrade authority |
+| `init_chain_config`, `update_chain_config`, `remove_chain_config`            | owner             |
+| `init_ccip_sender_ata`                                                       | owner             |
+| `ccip_send(params)`                                                          | anyone            |
+| `withdraw_tokens`, `update_router`, `transfer_ownership`, `accept_ownership` | owner             |
 
 ## Receiver program
 
@@ -80,12 +80,12 @@ the recipient and the extra args (`GenericExtraArgsV3`: gas limit, requested fin
 
 What happens depends on the message:
 
-| Message                                  | Receiver call | Result                                                                                         |
-| ---------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------- |
-| data, no tokens                          | yes           | data stored in `ReceiverState` (first 256 bytes, full length recorded) and emitted in `MessageReceived` |
-| tokens, empty data, gas limit 0          | no            | the OffRamp delivers the tokens; the program is not called and its policy is not consulted      |
-| tokens and any data except a forward payload | yes       | tokens stay in the token admin ATA, data stored                                                  |
-| tokens and a forward payload             | yes           | `forward_bps` of the amount stays, the rest goes to the beneficiary's ATA                      |
+| Message                                      | Receiver call | Result                                                                                                  |
+| -------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------- |
+| data, no tokens                              | yes           | data stored in `ReceiverState` (first 256 bytes, full length recorded) and emitted in `MessageReceived` |
+| tokens, empty data, gas limit 0              | no            | the OffRamp delivers the tokens; the program is not called and its policy is not consulted              |
+| tokens and any data except a forward payload | yes           | tokens stay in the token admin ATA, data stored                                                         |
+| tokens and a forward payload                 | yes           | `forward_bps` of the amount stays, the rest goes to the beneficiary's ATA                               |
 
 Forward payload: `"FWD1"` (`0x46574431`) followed by the 32-byte beneficiary wallet, 36 bytes in total. The beneficiary
 ATA is created if missing (rent paid by the `rent_payer` PDA, which the owner funds) and the transfer uses
@@ -103,7 +103,7 @@ The Solana executor args (`SVMExecutorArgsV1`) carry `useATA`, which tells the O
 | Value | Name                  | Token account credited                                   |
 | ----- | --------------------- | -------------------------------------------------------- |
 | 0     | `DeriveAtaAndCreate`  | ATA of the token receiver wallet, created if missing     |
-| 1     | `DeriveAtaDontCreate` | ATA of the token receiver wallet, which must exist        |
+| 1     | `DeriveAtaDontCreate` | ATA of the token receiver wallet, which must exist       |
 | 2     | `UseAsIs`             | the token receiver itself, which must be a token account |
 
 With 0, the OffRamp creates the ATA idempotently before verification and its transaction signer pays the rent. The
@@ -114,11 +114,11 @@ SDK uses 0 by default. The forward mode requires one of the ATA modes, so the to
 The OffRamp passes its own three accounts first (its CPI signer, its program id, the router's `allowed_offramp`
 PDA). The sender lists the rest in `SVMExecutorArgsV1.accounts`, with a writable bitmap over that list:
 
-| # | Account                                                                   | Writable |
-| - | ------------------------------------------------------------------------- | -------- |
-| 0 | `approved_sender`: `["approved_ccip_sender", source selector LE, sender]` |          |
-| 1 | `config`: `["config"]`                                                    |          |
-| 2 | `receiver_state`: `["receiver_state"]`                                    | yes      |
+| #   | Account                                                                   | Writable |
+| --- | ------------------------------------------------------------------------- | -------- |
+| 0   | `approved_sender`: `["approved_ccip_sender", source selector LE, sender]` |          |
+| 1   | `config`: `["config"]`                                                    |          |
+| 2   | `receiver_state`: `["receiver_state"]`                                    | yes      |
 
 Forward mode appends nine: `receiver_token_admin`, its ATA (writable), the mint, the token program, the beneficiary,
 the beneficiary ATA (writable), the associated token program, the system program, `rent_payer` (writable). The bitmap
@@ -144,23 +144,23 @@ A policy has two independent halves:
   accepted. `flags` bit 0 (`0x1`) also accepts messages sent with `safe` finality. `block_depth = n` (n > 0) also accepts
   messages that requested `n` or more block confirmations. `{0, 0}` means finalized only.
 
-| Spec in the scripts | `flags` | `block_depth` | Accepts                                  |
-| ------------------- | ------- | ------------- | ---------------------------------------- |
-| `finalized`         | 0       | 0             | finalized                                |
-| `safe`              | 1       | 0             | finalized, safe                          |
-| `depth:5`           | 0       | 5             | finalized, depth 5 or more               |
-| `safe+depth:1`      | 1       | 1             | finalized, safe, any depth               |
+| Spec in the scripts | `flags` | `block_depth` | Accepts                    |
+| ------------------- | ------- | ------------- | -------------------------- |
+| `finalized`         | 0       | 0             | finalized                  |
+| `safe`              | 1       | 0             | finalized, safe            |
+| `depth:5`           | 0       | 5             | finalized, depth 5 or more |
+| `safe+depth:1`      | 1       | 1             | finalized, safe, any depth |
 
 With no config for a source chain the answer is "lane defaults, finalized only". A message whose finality the policy
 does not accept is not executed; it stays pending at the OffRamp until the policy allows it, and the executor then
 delivers it. Token-only transfers skip the receiver and its policy.
 
-| Instruction                                              | Effect                                                                   |
-| -------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `set_ccv_policy({ source, sender?, ccvs?, finality? })`  | create or update the chain policy (`sender` none) or one sender's policy; a field passed as none keeps its value |
-| `remove_sender_ccv_policy(source, sender)`               | that sender falls back to the chain policy                               |
-| `remove_ccv_config(source)`                              | deletes the account: lane defaults, finalized only                       |
-| `get_ccvs_and_finality_config({ source, sender })`       | what the OffRamp reads; callable by anyone, e.g. in a simulation         |
+| Instruction                                             | Effect                                                                                                           |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `set_ccv_policy({ source, sender?, ccvs?, finality? })` | create or update the chain policy (`sender` none) or one sender's policy; a field passed as none keeps its value |
+| `remove_sender_ccv_policy(source, sender)`              | that sender falls back to the chain policy                                                                       |
+| `remove_ccv_config(source)`                             | deletes the account: lane defaults, finalized only                                                               |
+| `get_ccvs_and_finality_config({ source, sender })`      | what the OffRamp reads; callable by anyone, e.g. in a simulation                                                 |
 
 ### Other instructions
 
@@ -190,7 +190,26 @@ peer therefore stores two values for a Solana peer: the program id to send to an
 
 ### Reply strategies
 
-REPLY_STRATEGIES_PLACEHOLDER
+`ReplyMode::Deferred` (the default) splits the reply from the delivery. `ccip_receive_v2` appends the ping's sequence
+to the peer's queue (up to 16) and returns; `send_pending_reply` sends the oldest queued pong in its own transaction,
+signed by anyone. The incoming message lists four accounts (`config`, `peer` writable, `state` writable,
+`ccip_signer` writable) and its delivery never depends on the outgoing send. The price is a second transaction that
+someone has to submit.
+
+`ReplyMode::Immediate` sends the pong from inside `ccip_receive_v2`. The incoming message then lists the router and
+its `ccip_send_v2` accounts after the four above (36 accounts on the Devnet lane), and the router needs the pong's
+resolution metadata. A ping from the EVM peer carries only the 64-byte payload, so the program uses the metadata stored
+on the peer (`set_peer`, `reply_resolution_metadata`; `ping-pong.ts evm-args --immediate` prints it). The send runs one
+level below the OffRamp: OffRamp, receiver, router, and the router's own calls at the fourth level (`invoke [4]` in the
+logs). The runtime caps how deep calls nest, so keep the reply path free of extra intermediate programs. In that execution the receiver used
+about 190k compute units and the whole transaction about 510k, so give the ping a gas limit of 600k or more.
+
+If the pong cannot be sent (missing or stale metadata or router accounts, `ccip_signer` out of SOL), the whole
+incoming message fails and is not delivered until the cause is fixed and the message is executed again, for example
+with `ccip-cli manual-exec <sourceTx>`. Prefer `Deferred` unless the reply must be atomic with the delivery.
+
+The EVM peer always replies from `ccipReceive`. Its messages need a gas limit that covers the callback and the
+router send: about 585k gas on Sepolia (`ping-pong.ts peer --gas 700000`).
 
 ### When to combine sending and receiving in one program
 
@@ -234,7 +253,7 @@ solana-verify get-program-hash -u devnet FgFQwXGVeKDNawwer8Toa1xSKih1DgQp9JMjp3f
 | ------------------- | ------------------------------------------------------------------ |
 | `ccip_v2_sender`    | `4307779ca595b8be3159ad0d8392d50f6ee9fc9aa7b977404273814e282c30b7` |
 | `ccip_v2_receiver`  | `521324756a146c95121e743d01d5b7fe2be4a787576bc0b80327ee14712b9771` |
-| `ccip_v2_ping_pong` | `27933a4ec62bd6dec3ae8edd743d8486f62bc69813a87322e852c0bc5e606669` |
+| `ccip_v2_ping_pong` | `468ed16586d7b3bb099d869ab27dbeee7ed284ed4ce10cba6cf7bf916d9e69bc` |
 
 Run the build from a clean checkout: a `target/` directory produced by a local toolchain makes the container build
 fail.
