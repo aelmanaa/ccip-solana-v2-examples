@@ -201,8 +201,9 @@ its `ccip_send_v2` accounts after the four above (36 accounts on the Devnet lane
 resolution metadata. A ping from the EVM peer carries only the 64-byte payload, so the program uses the metadata stored
 on the peer (`set_peer`, `reply_resolution_metadata`; `ping-pong.ts evm-args --immediate` prints it). The send runs one
 level below the OffRamp: OffRamp, receiver, router, and the router's own calls at the fourth level (`invoke [4]` in the
-logs). The runtime caps how deep calls nest, so keep the reply path free of extra intermediate programs. In that execution the receiver used
-about 190k compute units and the whole transaction about 510k, so give the ping a gas limit of 600k or more.
+logs). The runtime caps how deep calls nest, so keep the reply path free of extra intermediate programs. The
+receiver and its send use about 190k compute units (the whole execution about 510k), so set the ping's gas limit,
+which becomes the receiver's compute budget, well above that; `evm-args --immediate --gas 600000` does.
 
 If the pong cannot be sent (missing or stale metadata or router accounts, `ccip_signer` out of SOL), the whole
 incoming message fails and is not delivered until the cause is fixed and the message is executed again, for example
