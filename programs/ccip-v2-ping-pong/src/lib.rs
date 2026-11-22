@@ -67,6 +67,8 @@ pub struct SetPeerParams {
     pub address: [u8; PEER_ADDRESS_LEN],
     pub accepted_sender: [u8; PEER_ADDRESS_LEN],
     pub extra_args: Vec<u8>,
+    /// Resolution metadata for immediate pongs (see `Peer::reply_resolution_metadata`).
+    pub reply_resolution_metadata: Vec<u8>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
@@ -119,7 +121,13 @@ pub mod ccip_v2_ping_pong {
             params.extra_args.len(),
             PingPongError::ExtraArgsTooLong
         );
+        require_gte!(
+            MAX_REPLY_METADATA_LEN,
+            params.reply_resolution_metadata.len(),
+            PingPongError::ExtraArgsTooLong
+        );
         let peer = &mut ctx.accounts.peer;
+        peer.reply_resolution_metadata = params.reply_resolution_metadata;
         peer.bump = ctx.bumps.peer;
         peer.chain_selector = params.chain_selector;
         peer.address = params.address;
@@ -208,8 +216,9 @@ pub mod ccip_v2_ping_pong {
     ///
     /// A pong is recorded. A ping is recorded and answered: in `Deferred` mode its sequence is
     /// queued on the peer account for `send_pending_reply`, in `Immediate` mode the pong is sent here
-    /// (remaining accounts: the router program, then its `ccip_send_v2` accounts). Bytes after
-    /// the 64-byte payload are passed to the router as resolution metadata in `Immediate` mode.
+    /// (remaining accounts: the router program, then its `ccip_send_v2` accounts). The router's
+    /// resolution metadata for that pong is the part of the ping after its 64-byte payload, or the
+    /// peer's stored `reply_resolution_metadata` when the ping carries none.
     pub fn ccip_receive_v2<'info>(
         ctx: Context<'info, CcipReceiveV2<'info>>,
         message: Any2SVMMessage,
@@ -280,7 +289,11 @@ pub mod ccip_v2_ping_pong {
                     signer_bump,
                     &ctx.accounts.peer,
                     encode_payload(KIND_PONG, sequence),
-                    message.data[PAYLOAD_LEN..].to_vec(),
+                    if message.data.len() > PAYLOAD_LEN {
+                        message.data[PAYLOAD_LEN..].to_vec()
+                    } else {
+                        ctx.accounts.peer.reply_resolution_metadata.clone()
+                    },
                 )?;
                 let state = &mut ctx.accounts.state;
                 state.pongs_sent = state

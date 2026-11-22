@@ -48,6 +48,7 @@ import {
     sendV0,
     solanaRpc,
     vecBytes,
+    quietLogger,
 } from './lib/common.ts'
 
 const P = SENDER_PROGRAM
@@ -62,7 +63,7 @@ const payer = loadKeypair()
 const me = payer.publicKey
 const { positional, opts } = args()
 const [cmd, destArg] = positional
-const dest = BigInt(destArg ?? '0')
+const dest = cmd === 'ata' ? 0n : BigInt(destArg ?? '0')
 
 async function run(name: string, ixs: TransactionInstruction[]): Promise<void> {
     const r = await sendV0(payer, ixs)
@@ -126,8 +127,18 @@ async function readChainConfig(): Promise<{ recipient: Buffer; extraArgsHex: str
     const extraArgsHex = hexlify(d.subarray(o, o + en))
     const decoded = decodeExtraArgs(extraArgsHex, ChainFamily.Solana)
     if (decoded?._tag !== 'GenericExtraArgsV3') throw new Error(`chain config extra args are not GenericExtraArgsV3`)
-    const { _tag: tag, ...extraArgs } = decoded
-    console.log({ extraArgsTag: tag })
+    // Decoding renders the empty executor as the zero pubkey and the empty token receiver as 0x;
+    // map both back to "not set" so the SDK quotes exactly the stored bytes.
+    const extraArgs: ExtraArgs = {
+        gasLimit: decoded.gasLimit,
+        finality: decoded.finality,
+        ccvs: decoded.ccvs,
+        ccvArgs: decoded.ccvArgs,
+        executor: decoded.executor === PublicKey.default.toBase58() ? '' : decoded.executor,
+        executorArgs: decoded.executorArgs,
+        tokenReceiver: decoded.tokenReceiver === '0x' ? '' : decoded.tokenReceiver,
+        tokenArgs: decoded.tokenArgs,
+    }
     return { recipient, extraArgsHex, extraArgs }
 }
 
@@ -222,7 +233,7 @@ switch (cmd) {
     case 'direct': {
         const cfg = await readChainConfig()
         const recipient = `0x${cfg.recipient.subarray(12).toString('hex')}`
-        const sol = await SolanaChain.fromUrl(solanaRpc())
+        const sol = await SolanaChain.fromUrl(solanaRpc(), { logger: quietLogger })
         const message = await sdkMessage(recipient)
         const quote = await sol.getFee({ router: SOLANA_ROUTER.toBase58(), destChainSelector: dest, message })
         const slippage = BigInt(opts.get('slippage-bps') ?? '2000')

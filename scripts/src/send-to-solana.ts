@@ -20,13 +20,14 @@ import {
     ccipExplorer,
     evmRpc,
     evmWallet,
+    quietLogger,
 } from './lib/common.ts'
 import { RX, forwardPayload, receiverAccounts, senderBytes } from './lib/receiver.ts'
 
 const { positional, opts } = args()
 const mode = positional[0] ?? 'data'
 const wallet = evmWallet()
-const evm = await EVMChain.fromUrl(evmRpc())
+const evm = await EVMChain.fromUrl(evmRpc(), { logger: quietLogger })
 
 const finalityOpt = opts.get('finality') ?? 'finalized'
 const finality = finalityOpt === 'finalized' || finalityOpt === 'safe' ? finalityOpt : Number(finalityOpt)

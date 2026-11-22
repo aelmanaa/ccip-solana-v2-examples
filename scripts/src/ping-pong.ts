@@ -2,6 +2,7 @@
 //
 //   node src/ping-pong.ts init [--mode deferred|immediate]     initialize, register with the router, fund ccip_signer
 //   node src/ping-pong.ts peer <selector> --address <0x peer> [--gas 400000] [--finality finalized|safe|<depth>]
+//                     [--reply-metadata 0x..]   router resolution metadata for immediate pongs (from evm-args --immediate)
 //   node src/ping-pong.ts mode deferred|immediate
 //   node src/ping-pong.ts ping <selector>                       owner only; fee paid by ccip_signer
 //   node src/ping-pong.ts reply <selector>                      send the oldest queued pong (anyone)
@@ -44,6 +45,7 @@ import {
     u8,
     vecBytes,
     vecPk,
+    quietLogger,
 } from './lib/common.ts'
 import { decodeCcvOut, formatFinality, parseFinality } from './lib/policy.ts'
 
@@ -222,7 +224,14 @@ switch (cmd) {
             new TransactionInstruction({
                 programId: P,
                 keys: [meta(PP.config), meta(PP.peer(sel), true), meta(me, true, true), meta(SystemProgram.programId)],
-                data: Buffer.concat([disc('set_peer'), le64(sel), address, address, vecBytes(extraArgs)]),
+                data: Buffer.concat([
+                    disc('set_peer'),
+                    le64(sel),
+                    address,
+                    address,
+                    vecBytes(extraArgs),
+                    vecBytes(Buffer.from((opts.get('reply-metadata') ?? '0x').slice(2), 'hex')),
+                ]),
             }),
         ])
         break
@@ -278,7 +287,7 @@ switch (cmd) {
             ],
             luts,
         )
-        const sol = await SolanaChain.fromUrl(solanaRpc())
+        const sol = await SolanaChain.fromUrl(solanaRpc(), { logger: quietLogger })
         const req = (await sol.getMessagesInTx(sent.signature))[0]
         console.log({
             sequence: seq.toString(),

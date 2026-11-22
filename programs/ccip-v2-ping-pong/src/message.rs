@@ -5,7 +5,7 @@ pub use ccip_common::messages::{SVMTokenAmount, SVMTokenReceiverUsage};
 ///
 /// A v2 message carries at most one token transfer. Beyond the amount, this exposes WHERE the
 /// OffRamp delivered the tokens so the receiver can verify who was credited on a (programmatic)
-/// token transfer — it mirrors the OffRamp's own `token_receiver` / `token_receiver_usage` inputs
+/// token transfer: it mirrors the OffRamp's own `token_receiver` / `token_receiver_usage` inputs
 /// (see `ccip_common::v2::validate_and_parse_offramp_token_accounts_v2`).
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct TokenTransfer {
@@ -22,7 +22,7 @@ pub struct TokenTransfer {
 /// WIRE-FORMAT CONTRACT: the OffRamp must serialize a byte-identical struct when it CPIs
 /// `ccip_receive_v2`. Note this deliberately carries the token transfer as `Option<TokenTransfer>`
 /// (a v2 message carries at most one token transfer), which is NOT Borsh-compatible with the
-/// OffRamp's legacy v1 `Any2SVMMessage` (`token_amounts: Vec<SVMTokenAmount>` — `Option` is a 1-byte
+/// OffRamp's legacy v1 `Any2SVMMessage` (`token_amounts: Vec<SVMTokenAmount>`: `Option` is a 1-byte
 /// tag, `Vec` a 4-byte length prefix). This type is currently copied here rather than shared.
 ///
 /// The OffRamp serializes a matching struct (`ccip-offramp`'s `Any2SVMMessageV2`) when it CPIs

@@ -291,5 +291,13 @@ export function args(argv = process.argv.slice(2)): { positional: string[]; opts
     return { positional, opts }
 }
 
+/** Logger that keeps SDK debug and info output off the console. */
+export const quietLogger = {
+    debug: (): void => undefined,
+    info: (): void => undefined,
+    warn: console.warn,
+    error: console.error,
+}
+
 export const explorerTx = (sig: string): string => `https://explorer.solana.com/tx/${sig}?cluster=devnet`
 export const ccipExplorer = (messageId: string): string => `https://ccip.chain.link/msg/${messageId}`

@@ -15,7 +15,10 @@ export default tseslint.config(
         rules: {
             '@typescript-eslint/no-non-null-assertion': 'error',
             '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
-            '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true, allow: [{ from: 'lib', name: 'bigint' }] }],
+            '@typescript-eslint/restrict-template-expressions': [
+                'error',
+                { allowNumber: true, allow: [{ from: 'lib', name: 'bigint' }] },
+            ],
             eqeqeq: ['error', 'always'],
         },
     },

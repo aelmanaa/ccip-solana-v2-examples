@@ -17,6 +17,7 @@ pub const CCV_CONFIG_SEED: &[u8] = ccip_common::ccvs::RECEIVER_CCV_CONFIG_SEED;
 /// (the same bytes the OffRamp delivers as the sender and the router expects as the receiver).
 pub const PEER_ADDRESS_LEN: usize = 32;
 pub const MAX_EXTRA_ARGS_LEN: usize = 512;
+pub const MAX_REPLY_METADATA_LEN: usize = 64;
 pub const MAX_CCVS: usize = 8;
 /// Replies a peer account can queue in `Deferred` mode.
 pub const MAX_PENDING_REPLIES: usize = 16;
@@ -71,6 +72,11 @@ pub struct Peer {
     /// Sequences of pings waiting for `send_pending_reply`, oldest first.
     #[max_len(MAX_PENDING_REPLIES)]
     pub pending_replies: Vec<u64>,
+    /// Router resolution metadata for a pong to this peer, used by `ReplyMode::Immediate` when the
+    /// ping carries none. The pong has a fixed shape, so this stays valid until the router's
+    /// account layout for the lane changes.
+    #[max_len(MAX_REPLY_METADATA_LEN)]
+    pub reply_resolution_metadata: Vec<u8>,
 }
 
 #[account]

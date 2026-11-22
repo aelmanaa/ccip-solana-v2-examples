@@ -93,6 +93,7 @@ fn setup(mode: ReplyMode) -> Harness {
                     address: peer_bytes(),
                     accepted_sender: peer_bytes(),
                     extra_args: EXTRA_ARGS.to_vec(),
+                    reply_resolution_metadata: vec![7, 7],
                 },
             },
             ccip_v2_ping_pong::accounts::SetPeer {
@@ -334,6 +335,23 @@ fn immediate_reply_is_sent_inside_receive() {
     let s: PingPongState = h.account(&state());
     assert_eq!((s.pings_received, s.pongs_sent), (1, 1));
     assert!(r.compute_units > 0);
+}
+
+#[test]
+fn immediate_reply_uses_stored_metadata_when_the_ping_has_none() {
+    let mut h = setup(ReplyMode::Immediate);
+    let mut accounts = receive_accounts();
+    accounts.push(AccountMeta::new_readonly(h.router, false));
+    accounts.extend(router_accounts(&h));
+    h.deliver(
+        PP,
+        EVM_SOURCE,
+        msg(peer_bytes(), encode_payload(KIND_PING, 9)),
+        accounts,
+    )
+    .unwrap();
+    let sent: LastSend = h.account(&last_send(&h));
+    assert_eq!(sent.params.resolution_metadata, vec![7, 7]);
 }
 
 #[test]

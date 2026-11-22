@@ -19,7 +19,7 @@ const RECEIVER_VERSION_V2: u8 = 2;
 /// Registers this program as a CCIP **v2** receiver in the router.
 ///
 /// Only the program's owner may call it. It CPIs the router's `register_receiver`,
-/// signing with this program's `RECEIVER_REGISTRATION_SIGNER` PDA — only this program can
+/// signing with this program's `RECEIVER_REGISTRATION_SIGNER` PDA: only this program can
 /// `invoke_signed` for that PDA, which is exactly how the router proves the registration was
 /// authorized by the receiver program itself. The receiver's admin never calls the router directly.
 pub fn register_with_router(ctx: Context<RegisterWithRouter>) -> Result<()> {
